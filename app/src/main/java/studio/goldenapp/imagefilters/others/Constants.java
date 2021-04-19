@@ -14,10 +14,9 @@ public class Constants {
     public static final int FLASH_LIGHT_OFF = 1;
 
     //Shapes
-    public static final int RECTANGLE = 0;
-    public static final int CIRCLE = 1;
-    public static final int TRIANGLE = 2;
-    public static final int CUBE = 3;
+    public static final int NO_SHAPE = 0;
+    public static final int TRIANGLE = 1;
+    public static final int RECTANGLE = 2;
 
     // filter
     public static final int FILTER_OFF = 1;

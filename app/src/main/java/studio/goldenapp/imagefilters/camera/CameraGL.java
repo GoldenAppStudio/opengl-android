@@ -2,33 +2,21 @@ package studio.goldenapp.imagefilters.camera;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.ButtonBarLayout;
+import org.w3c.dom.Text;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,14 +24,10 @@ import java.util.Date;
 import studio.goldenapp.imagefilters.R;
 
 import static android.content.ContentValues.TAG;
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
-import static studio.goldenapp.imagefilters.others.Constants.BACK_CAMERA;
-import static studio.goldenapp.imagefilters.others.Constants.CIRCLE;
-import static studio.goldenapp.imagefilters.others.Constants.CUBE;
 import static studio.goldenapp.imagefilters.others.Constants.FILTER_OFF;
 import static studio.goldenapp.imagefilters.others.Constants.FLASH_LIGHT_OFF;
 import static studio.goldenapp.imagefilters.others.Constants.FLASH_LIGHT_ON;
-import static studio.goldenapp.imagefilters.others.Constants.FRONT_CAMERA;
+import static studio.goldenapp.imagefilters.others.Constants.NO_SHAPE;
 import static studio.goldenapp.imagefilters.others.Constants.RECTANGLE;
 import static studio.goldenapp.imagefilters.others.Constants.TRIANGLE;
 
@@ -57,7 +41,7 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
     ImageView settingBtn, flashBtn;
     FrameLayout frameLayout;
 
-    int flashLightStatus, cameraDirection, filterToggle;
+    int flashLightStatus, cameraDirection, filterToggle, shape;
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -108,12 +92,22 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
 
         initialiseUI();
 
-        filterToggle = getIntent().getIntExtra("_filterToggle", 1);
+        filterToggle = getIntent().getIntExtra("_filterToggle", FILTER_OFF);
         if (filterToggle == FILTER_OFF) {
             filterBtn.setImageResource(R.drawable.funnel);
         } else filterBtn.setImageResource(R.drawable.filter_on);
 
-        glSurfaceView = new MyGLSurfaceView(this, filterToggle);
+        shape = getIntent().getIntExtra("_shape", NO_SHAPE);
+        if (shape == NO_SHAPE) {
+            glSurfaceView = new MyGLSurfaceView(this, filterToggle, NO_SHAPE);
+        } else if (shape == TRIANGLE) {
+            glSurfaceView = new MyGLSurfaceView(this, filterToggle, TRIANGLE);
+        } else if (shape == RECTANGLE) {
+            glSurfaceView = new MyGLSurfaceView(this, filterToggle, RECTANGLE);
+        } else {
+            glSurfaceView = new MyGLSurfaceView(this, filterToggle, NO_SHAPE);
+        }
+
         renderer = glSurfaceView.getRenderer();
         frameLayout.addView(glSurfaceView);
 
@@ -127,11 +121,13 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
             Intent intent = new Intent(CameraGL.this, CameraGL.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("_filterToggle", 0);
+            intent.putExtra("_shape", shape);
             startActivity(intent);
         } else {
             Intent intent = new Intent(CameraGL.this, CameraGL.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("_filterToggle", FILTER_OFF);
+            intent.putExtra("_shape", shape);
             startActivity(intent);
         }
     }
@@ -141,19 +137,32 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
         dialog.setContentView(R.layout.objects_popup);
         dialog.setTitle("Choose a shape");
         TextView rectangle = dialog.findViewById(R.id.rectangle);
-        TextView circle = dialog.findViewById(R.id.circle);
         TextView triangle = dialog.findViewById(R.id.triangle);
-        TextView cube = dialog.findViewById(R.id.cube);
+        TextView noShape = dialog.findViewById(R.id.no_shape);
 
         rectangle.setOnClickListener(view -> renderShape(RECTANGLE));
-        circle.setOnClickListener(view -> renderShape(CIRCLE));
         triangle.setOnClickListener(view -> renderShape(TRIANGLE));
-        cube.setOnClickListener(view -> renderShape(CUBE));
+        noShape.setOnClickListener(view -> renderShape(NO_SHAPE));
 
         dialog.show();
     }
 
-    private void renderShape(int shape) {}
+    private void renderShape(int shape) {
+        Intent intent = new Intent(CameraGL.this, CameraGL.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (shape == TRIANGLE) {
+            intent.putExtra("_shape", 1);
+            intent.putExtra("_filterToggle", filterToggle);
+        } else if (shape == RECTANGLE) {
+            intent.putExtra("_shape", 2);
+            intent.putExtra("_filterToggle", filterToggle);
+        } else {
+            intent.putExtra("_shape", 0);
+            intent.putExtra("_filterToggle", filterToggle);
+        }
+
+        startActivity(intent);
+    }
 
     public void initialiseUI() {
         frameLayout = findViewById(R.id.texture);
@@ -183,22 +192,26 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
     }
 
     private void switchFlashLight() {
-        if (flashLightStatus == FLASH_LIGHT_OFF) {
+        /*if (flashLightStatus == FLASH_LIGHT_OFF) {
             flashLightStatus = FLASH_LIGHT_ON;
         } else {
             flashLightStatus = FLASH_LIGHT_OFF;
-        }
+        }*/
+
+        Toast.makeText(this, "Coming soon!", Toast.LENGTH_SHORT).show();
     }
 
     private void switchCamera() {
         /*if (cameraDirection == FRONT_CAMERA) cameraDirection = BACK_CAMERA;
         else cameraDirection = FRONT_CAMERA;*/
 
-        Camera.Parameters parameters = mCamera.getParameters();
+        /*Camera.Parameters parameters = mCamera.getParameters();
         parameters.setRotation(90);
         //requestLayout();
 
-        mCamera.setParameters(parameters);
+        mCamera.setParameters(parameters);*/
+
+        Toast.makeText(this, "Coming soon!", Toast.LENGTH_SHORT).show();
     }
 
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
@@ -214,11 +227,3 @@ public class CameraGL extends Activity implements SurfaceTexture.OnFrameAvailabl
     }
 
 }
-
-/**
- *      in the weekend i was working with kotlin to freshen up the syntax and
- *      and all the stuff and was doing some opengl workaround with kotlin
- *      and today i will look forward to start the actual work
- *
- **/
-

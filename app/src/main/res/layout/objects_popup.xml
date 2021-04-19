@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/rectangle"
         android:textColor="#000"
-        android:textSize="22sp"
+        android:textSize="30sp"
         android:text="Rectangle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -21,24 +21,9 @@
         android:layout_width="wrap_content"
         android:layout_height="0.2dp" />
 
-    <TextView
-        android:textSize="22sp"
-        android:id="@+id/circle"
-        android:textColor="#000"
-        android:text="Circle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <View
-        android:background="#000"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
-        android:layout_width="wrap_content"
-        android:layout_height="0.2dp" />
-
 
     <TextView
-        android:textSize="22sp"
+        android:textSize="30sp"
         android:id="@+id/triangle"
         android:textColor="#000"
         android:text="Triangle"
@@ -54,12 +39,11 @@
 
 
     <TextView
-        android:textSize="22sp"
-        android:id="@+id/cube"
+        android:textSize="30sp"
+        android:id="@+id/no_shape"
         android:textColor="#000"
-        android:text="Cube"
+        android:text="No Shape"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
 
 </LinearLayout>
